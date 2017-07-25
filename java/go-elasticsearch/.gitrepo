@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/alextanhongpin/go-elasticsearch.git
+	branch = master
+	commit = c1802c3afee777831aca31c64df709d09d229a11
+	parent = c6ca40ba222ce79e2931f7aa17a96d0d79dc6132
+	cmdver = 0.3.0
