@@ -20,7 +20,7 @@ job "search" {
 
     ephemeral_disk {
       migrate = true
-      size = "500"
+      size = "5000"
       sticky = true
     }
 
@@ -41,8 +41,8 @@ job "search" {
         class_path = "local/elasticsearch-5.5.0/lib/*"
         jvm_options = [
           "-Des.path.home=${ES_HOME}",
-          "-Xmx768m",
-          "-Xms768m",
+          "-Xmx512m",
+          "-Xms512m",
           "-XX:+UseConcMarkSweepGC",
           "-XX:CMSInitiatingOccupancyFraction=75",
           "-XX:+UseCMSInitiatingOccupancyOnly",
@@ -70,14 +70,14 @@ job "search" {
       }
 
       resources {
-        # 1000 MHz
-        cpu = 1000
-        # 512 MB
-        disk = 512
+        # 150 MHz; burstable
+        cpu = 150
+        # 2GB; twice memory alloc
+        disk = 2048
         # 1024 MB
         memory = 1024
         network {
-          mbits = 10
+          mbits = 100
           port "eshttp" {}
           port "estransport" {}
         }
@@ -100,25 +100,39 @@ job "search" {
 
       template {
         data = <<EOH
+          # Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-network.html#network-interface-values
+          # network.host: [ "0.0.0.0", "_eth0_", "_site_", "_global_" ]
+          # discovery.zen.ping.unicast.hosts: ["127.0.0.1", "[::1]"]
+          # http.port: {{ env "NOMAD_HOST_PORT_eshttp" }}
+          # transport.tcp.port: {{ env "NOMAD_HOST_PORT_estransport" }}
+          # Below special cases needed to address proxy
+          # network.bind_host (incoming), network.publish_host (node-to-node communications)
+          # http.publish_port: {{ env "NOMAD_HOST_PORT_eshttp" }}
+          # transport.publish_port: {{ env "NOMAD_HOST_PORT_estransport" }}
+
           cluster.name: {{ env "ES_CLUSTER_NAME" }}
           network.host: {{ env "attr.unique.network.ip-address" }}
-          bootstrap.memory_lock: true
           # discovery.zen.minimum_master_nodes: 2
           network.publish_host: {{ env "attr.unique.network.ip-address" }}
           # {{ if service "escluster-transport"}}discovery.zen.ping.unicast.hosts:{{ range service "escluster-transport" }}
           # - {{ .Address }}:{{ .Port }}{{ end }}{{ end }}
           http.port: {{ env "NOMAD_HOST_PORT_eshttp" }}
-          http.publish_port: {{ env "NOMAD_HOST_PORT_eshttp" }}
           transport.tcp.port: {{ env "NOMAD_HOST_PORT_estransport" }}
-          transport.publish_port: {{ env "NOMAD_HOST_PORT_estransport" }}
+
+          # Specific port from example elasticsearch.yml (memory should be 1/2 of available memory)
+          bootstrap.memory_lock: true
+          # node.name: node-1
+          # node.attr.rack: r1
+          # path.data: /path/to/data,/another/path/to/data_for_perf_raid0
+          # path.logs: /path/to/logs
 
           # Below are tweaks which may only be suitable in dev environments
           cluster.routing.allocation.disk.threshold_enabled: false
       EOH
         destination = "local/elasticsearch-5.5.0/config/elasticsearch.yml"
-        change_mode = "noop"
-        // change_mode = "signal"
-        // change_signal = "SIGHUP"
+        // change_mode = "noop"
+        change_mode = "signal"
+        change_signal = "SIGHUP"
       }
 
     }
