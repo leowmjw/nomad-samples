@@ -4,3 +4,9 @@
 
 # Module directory
 .terraform/
+
+# Ignore any binaries created
+java/go-elasticsearch/go-deindexer/go-deindexer
+java/go-elasticsearch/go-indexer/go-indexer
+java/go-elasticsearch/go-searcher/go-searcher
+
