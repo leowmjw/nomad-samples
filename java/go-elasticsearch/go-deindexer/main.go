@@ -29,7 +29,7 @@ func main() {
 		panic(err)
 	}
 
-	hosts, err := esClient.Service("global-elastichsearch-check", "search")
+	hosts, err := esClient.Service("search-simple-elasticsearch", "lolcats")
 	if err != nil {
 		panic(err)
 	}

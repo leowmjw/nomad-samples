@@ -2,7 +2,7 @@
 const consul = require('consul')()
 const elasticsearch = require('elasticsearch')
 
-consul.catalog.service.nodes('global-elastichsearch-check', (err, results) => {
+consul.catalog.service.nodes('search-simple-elasticsearch', (err, results) => {
   if (err) {
     throw err
   }
@@ -17,7 +17,8 @@ consul.catalog.service.nodes('global-elastichsearch-check', (err, results) => {
     log: 'trace',
     hosts: [
       {
-        host: result.ServiceAddress,
+        // host: result.ServiceAddress,
+        host: localhost,
         auth: 'elastic:changeme',
         protocol: 'http',
         port: result.ServicePort

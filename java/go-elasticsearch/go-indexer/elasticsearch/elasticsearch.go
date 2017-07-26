@@ -25,7 +25,7 @@ func (c *Consul) Service(service, tag string) ([]string, error) {
 	}
 
 	for _, v := range addrs {
-		endpoints = append(endpoints, "http://"+v.Service.Address+":"+strconv.Itoa(v.Service.Port))
+		endpoints = append(endpoints, "http://localhost:"+strconv.Itoa(v.Service.Port))
 	}
 	return endpoints, nil
 }

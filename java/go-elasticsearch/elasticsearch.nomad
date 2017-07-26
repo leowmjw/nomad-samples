@@ -12,7 +12,7 @@ job "search" {
   group "simple" {
     count = 1
     restart {
-      attempts = 10
+      attempts = 2
       interval = "5m"
       delay = "25s"
       mode = "delay"
@@ -111,10 +111,14 @@ job "search" {
           http.publish_port: {{ env "NOMAD_HOST_PORT_eshttp" }}
           transport.tcp.port: {{ env "NOMAD_HOST_PORT_estransport" }}
           transport.publish_port: {{ env "NOMAD_HOST_PORT_estransport" }}
+
+          # Below are tweaks which may only be suitable in dev environments
+          cluster.routing.allocation.disk.threshold_enabled: false
       EOH
         destination = "local/elasticsearch-5.5.0/config/elasticsearch.yml"
-        change_mode = "signal"
-        change_signal = "SIGHUP"
+        change_mode = "noop"
+        // change_mode = "signal"
+        // change_signal = "SIGHUP"
       }
 
     }
