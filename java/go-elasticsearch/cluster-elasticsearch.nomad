@@ -97,7 +97,13 @@ job "search" {
         ]
         port = "eshttp"
         check {
-          name = "quorum"
+          name = "available"
+          type = "tcp"
+          interval = "10s"
+          timeout = "2s"
+        }
+        check {
+          name = "ready"
           type = "http"
           port = "eshttp"
           path = "/_cluster/health?wait_for_status=yellow"
@@ -125,7 +131,7 @@ job "search" {
           discovery.zen.minimum_master_nodes: 2
           # network.publish_host: {{ env "attr.unique.network.ip-address" }}
           {{ if service "escluster-transport"}}discovery.zen.ping.unicast.hosts:{{ range service "escluster-transport" }}
-            - {{ .Address }}:{{ .Port }}{{ end }}{{ end }}
+            - {{ if eq .Address "::1" }}localhost{{ else }}{{ .Address }}{{ end }}:{{ .Port }}{{ end }}{{ end }}
           http.port: {{ env "NOMAD_HOST_PORT_eshttp" }}
           transport.tcp.port: {{ env "NOMAD_HOST_PORT_estransport" }}
 
