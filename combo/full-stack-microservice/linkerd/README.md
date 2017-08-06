@@ -1,26 +1,16 @@
-# Linkerd + Consul
 
-WIP: What is this?
+## Consul
+The consul folder contains example on running linkerd with a local consul agent `consul agent -dev`
+
+## Docker-compose
+
+Consul will be started with the other containers, coupled, probably not a good choice.
 
 
-```bash
-# Run
-$ docker-compose up -d
+### Conclusion
 
-# View dashboard UI
-$ open localhost:9990
+You can use linkerd for load balancing, but the ip ports cannot be dynamic?
 
-# Make a request to audit and helloworld
-# Note that both ip is static
-$ curl localhost:4140/helloworld
-$ curl localhost:4140/audit/health
 
-# Make a request to web
-# Does not work when ip is dynamic?
-$ curl localhost:4140/web
-
-# With host
-$ curl -H "Host: audit.service.dc1.consul" http://localhost:4140/audit/health
-
-$ curl -H "Host: audit" http://localhost:4140/audit/health
-```
+## TODO
+How to create a proper architecture with linkerd?
