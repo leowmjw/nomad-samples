@@ -5,6 +5,7 @@ import (
 	"html"
 	"log"
 	"net/http"
+	"os"
 )
 
 // Simple HTTP server here ...
@@ -15,5 +16,13 @@ func main() {
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	// If the Nomad port for this port is defined, use it
+	// else default to 8888 .. for testing purpose ..
+	// label is NOMAD_PORT_http
+	val, ok := os.LookupEnv("NOMAD_PORT_http")
+	if ok {
+		log.Fatal(http.ListenAndServe(":"+val, nil))
+	} else {
+		log.Fatal(http.ListenAndServe(":8888", nil))
+	}
 }

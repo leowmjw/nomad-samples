@@ -10,5 +10,5 @@ Hashicorp Nomad Samples and Examples worked through on request
 $ ~/NOMAD/consul agent -bind 0.0.0.0 -dev -config-file=consul-conf.json -data-dir=/tmp/consul
 
 # Start up Nomad
-$ ~/NOMAD/nomad agent -bind 0.0.0.0 -dev -config=nomad.hcl -config=nomad-conf.json -data-dir=/tmp/nomad
+$ ~/NOMAD/nomad agent -dev -config=nomad.hcl -config=nomad-conf.json -data-dir=/tmp/nomad
 ```
