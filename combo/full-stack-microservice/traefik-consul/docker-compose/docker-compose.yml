@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  consul:
+    image: consul:latest
+    networks:
+      webapp:
+    ports:
+    - 8500:8500
+    restart: on-failure
+
+  registry:
+    image: gliderlabs/registrator:latest
+    command: -internal -cleanup consul:8500
+    network_mode: host # Equivalent to --net=host
+    volumes:
+    - "/var/run/docker.sock:/tmp/docker.sock"
+    depends_on:
+    - consul
+
+  traefik:
+    networks:
+      webapp:
+    image: traefik:latest
+    # Optional. Use the conf file
+    command: "--web --consul --consul.endpoint=consul:8500 --consul.watch --consulcatalog --consulcatalog.endpoint=consul:8500  --consulcatalog.domain=consul.localhost --consulcatalog.watch"
+    # volumes:
+    # - './conf/:/etc/traefik/'
+    # links:
+    # - consul
+    # depends_on:
+    # - consul
+    networks:
+      webapp:
+    ports:
+    - 80
+    - 8080
+    restart: on-failure
+
+  whoami:
+    image: emilevauge/whoami
+    networks:
+      webapp:
+    depends_on:
+      - registry
+    # Doesn't work with registrator
+    # labels:
+    #   - "traefik.backend=whoami"
+    #   - "traefik.frontend.rule=Host:whoami.consul.localhost"
+    environment:
+    - SERVICE_NAME=whoami
+    - SERVICE_TAGS=whoami,service
+    - SERVICE_REGION=ap-southeast-1
+
+networks:
+  webapp:
