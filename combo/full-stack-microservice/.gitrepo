@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/alextanhongpin/full-stack-microservice.git
+	branch = master
+	commit = 3cc06235c623470e51c8164a854e9d556ca4c307
+	parent = ddba562f4d0033b879e00330b924dfd60f7e7ea8
+	cmdver = 0.3.0
