@@ -6,6 +6,6 @@
 [subrepo]
 	remote = https://github.com/alextanhongpin/full-stack-microservice.git
 	branch = master
-	commit = 3e004e3698b2729ff326a326869f3d03c87c05d3
-	parent = a7f8547e415b3b304c490697ac915856bc095c62
+	commit = 63466489010a4d575082804e052ff234e38c89a6
+	parent = 97d354ee3b0247d1f7098a03123f0f1408a3047e
 	cmdver = 0.3.0

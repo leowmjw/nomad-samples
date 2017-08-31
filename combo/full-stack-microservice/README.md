@@ -1,93 +1,44 @@
-# full-stack-microservice
 
-The goal is to design a working microservice architecture with the following components:
+# Elasticsearch setup with Nomad and Consul
 
-## Infrastructure
+Default credentials for elastic search
 
-- Terraform
++ username: elastic
++ password: changeme
 
-## Load Balancer
+```bash
+$ nomad agent -dev
+$ consul agent -dev
+```
 
-- Nginx
-- HAProxy
-- Traefik
-- Envoy
-- Linkerd
-- Fabio
 
-## Scheduler
+View the Consul UI at http://127.0.0.1:8500
 
-- Nomad
+```bash
+$ docker run -e NOMAD_ENABLE=1 -e CONSUL_ENABLE=1 -e CONSUL_BIND_INTERFACE=eth0 -e NOMAD_ADDR=http://127.0.0.1:4646 -e NOMAD_PORT_HTTP="192.168.8.100:3000" -e LISTEN_ADDRESS=192.168.8.100:3000 -p 8000:3000 jippi/hashi-ui:v0.13.6
 
-## Orchestration
 
-- Docker Swarm
-- Kubernetes
+# Does not work
+$ docker run -e NOMAD_ENABLE=1 -e NOMAD_ADDR=http://nomad.service.consul:4646 -p 8000:3000 jippi/hashi-ui:v0.13.6
 
-## API Gateway
+# Does not work
+$ docker run --rm -e NOMAD_PROXY_ADDRESS="localhost:3000/nomad" -e NOMAD_ENABLE=true -e NOMAD_ADDR=http://nomad.service.consul:4646 -p 3000:3000 jippi/hashi-ui:v0.13.6
 
-- Kong
-- Tyk
-- Istio
-- Linkerd (since it does load balancing, circuit breaker)
-- express-gateway
-- API Umbrella
 
-## Search
+# Does not work
+$ docker run -e NOMAD_ENABLE=1 -p 8000:3000 jippi/hashi-ui
 
-- Elasticsearch
-- Solr
+# Does not work
+$ docker run --rm -e NOMAD_ENABLE=1 -e NOMAD_ADDR=http://192.168.8.100:4646 -p 3000:3000 jippi/hashi-ui:v0.13.6
 
-## Cache
+# Works
+$ docker run --net=host --rm -e NOMAD_ENABLE=1 -e NOMAD_ADDR=http://docker.for.mac.localhost:4646 -p 3000:3000 jippi/hashi-ui:v0.13.6
+```
 
-- Redis (also for rate-limiting)
-- Memcached
-- Varnish
-- Zipnish
 
-## Tracing
 
-- OpenTracing
-- OpenZipkin
+# Hashi UI
 
-## Auth
+If you are planning to use hashi-ui as artifacts:
 
-- OpenId Connect
-- OAuth2
-
-## Secrets
-
-- DockerSecrets
-- Vault
-
-## Transport
-
-- Kafka
-- Nats
-- grpc
-- protobuff
-- Thrift
-- Avro
-- RabbitMQ
-- ZeroMQ
-
-## Documentation
-
-- Swagger
-
-### Others
-
-- Client/server-side service discovery (nodejs resilient, etcd, Linkerd, Consul)
-- Consul/etcd setup
-- Circuit breaker
-- Docker-compose or nomad setup
-- Dynamic ports and service registry
-- 12-Factor app practices
-- Heteregenous clients (nodejs, go, python)
-- Transport protocol (kafka, nats, rabbitmq, rpc, grpc, protobuff)
-- Caching (Redis/memcached)
-- API Gateway (kong, API Umbrella, AWS API Gateway)
-- OpenID connect
-- Sharding/Clustering of storage
-- Vault
-
+https://github.com/jippi/hashi-ui/releases/download/v0.13.6/hashi-ui-darwin-amd64
