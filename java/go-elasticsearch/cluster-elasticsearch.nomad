@@ -22,17 +22,17 @@ job "search" {
       driver = "java"
 
       artifact {
-        source = "http://localhost:8080/elasticsearch-5.5.0.zip"
-        // source = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.0.zip"
-        destination = "/local"
+        source = "http://localhost:8080/elasticsearch-5.5.2.zip"
+        // source = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.2.zip"
+        destination = "local"
         options {
-          checksum = "sha1:b5835f207cec4ed73758f5f1640ede59851f873f"
+          checksum = "sha1:9d549e8f3d2bc5051fdf6973e2edd110f04c6dc3"
         }
       }
 
       config {
         class = "org.elasticsearch.bootstrap.Elasticsearch"
-        class_path = "/local/elasticsearch-5.5.0/lib/*"
+        class_path = "local/elasticsearch-5.5.2/lib/*"
         jvm_options = [
           "-Des.path.home=${ES_HOME}",
           "-Xmx512m",
@@ -59,7 +59,7 @@ job "search" {
       }
 
       env {
-        ES_HOME = "/local/elasticsearch-5.5.0"
+        ES_HOME = "local/elasticsearch-5.5.2"
       }
 
       resources {
@@ -115,8 +115,7 @@ job "search" {
           # Below are tweaks which may only be suitable in dev environments
           cluster.routing.allocation.disk.threshold_enabled: false
       EOH
-        destination = "/local/elasticsearch-5.5.0/config/elasticsearch.yml"
-        change_mode = "noop"
+        destination = "local/elasticsearch-5.5.2/config/elasticsearch.yml"
       }
 
     }
@@ -143,17 +142,17 @@ job "search" {
       driver = "java"
 
       artifact {
-        source = "http://localhost:8080/elasticsearch-5.5.0.zip"
-        // source = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.0.zip"
+        source = "http://localhost:8080/elasticsearch-5.5.2.zip"
+        // source = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.2.zip"
         destination = "local"
         options {
-          checksum = "sha1:b5835f207cec4ed73758f5f1640ede59851f873f"
+          checksum = "sha1:9d549e8f3d2bc5051fdf6973e2edd110f04c6dc3"
         }
       }
 
       config {
         class = "org.elasticsearch.bootstrap.Elasticsearch"
-        class_path = "local/elasticsearch-5.5.0/lib/*"
+        class_path = "local/elasticsearch-5.5.2/lib/*"
         jvm_options = [
           "-Des.path.home=${ES_HOME}",
           "-Xmx512m",
@@ -181,7 +180,7 @@ job "search" {
 
       env {
         ES_CLUSTER_NAME = "escluster"
-        ES_HOME = "local/elasticsearch-5.5.0"
+        ES_HOME = "local/elasticsearch-5.5.2"
       }
 
       resources {
@@ -259,7 +258,7 @@ job "search" {
           # Below are tweaks which may only be suitable in dev environments
           cluster.routing.allocation.disk.threshold_enabled: false
       EOH
-        destination = "local/elasticsearch-5.5.0/config/elasticsearch.yml"
+        destination = "local/elasticsearch-5.5.2/config/elasticsearch.yml"
         // change_mode = "restart"
         change_mode = "noop"
         // change_mode = "signal"
