@@ -9,6 +9,58 @@ job "search" {
     max_parallel = 1
   }
 
+  group "admin" {
+    count = "1"
+
+    restart {
+      attempts = 2
+      interval = "1m"
+      delay = "25s"
+      mode = "delay"
+    }
+
+    task "cerebro" {
+      driver = "docker"
+
+      config {
+        image = "yannart/cerebro:latest"
+        port_map {
+          cerebro = "9000"
+        }
+      }
+
+      resources {
+        # 150 MHz; burstable
+        cpu = 150
+        # 500 MB
+        disk = 500
+        # 1024 MB
+        memory = 1024
+        network {
+          port "cerebro" {
+            static = "9000"
+          }
+        }
+      }
+
+      service {
+        tags = [
+          "admin",
+          "search"
+        ]
+        port = "cerebro"
+        check {
+          name = "alive"
+          type = "tcp"
+          interval = "10s"
+          timeout = "2s"
+        }
+      }
+
+    }
+
+  }
+
   group "simple" {
     count = 1
     restart {
@@ -70,7 +122,9 @@ job "search" {
         memory = 768
         network {
           mbits = 10
-          port "eshttp" {}
+          port "eshttp" {
+            static = "9200"
+          }
           port "estransport" {}
         }
       }
@@ -101,12 +155,12 @@ job "search" {
           # http.publish_port: {{ env "NOMAD_HOST_PORT_eshttp" }}
           # transport.publish_port: {{ env "NOMAD_HOST_PORT_estransport" }}
 
-          network.host: {{ env "attr.unique.network.ip-address" }}
+          network.host: [ "0.0.0.0" ]
           http.port: {{ env "NOMAD_HOST_PORT_eshttp" }}
           transport.tcp.port: {{ env "NOMAD_HOST_PORT_estransport" }}
 
           # Specific port from example elasticsearch.yml (memory should be 1/2 of available memory)
-          bootstrap.memory_lock: true
+          # bootstrap.memory_lock: true
           # node.name: node-1
           # node.attr.rack: r1
           # path.data: /path/to/data,/another/path/to/data_for_perf_raid0
@@ -240,7 +294,7 @@ job "search" {
           # transport.publish_port: {{ env "NOMAD_HOST_PORT_estransport" }}
 
           cluster.name: {{ env "ES_CLUSTER_NAME" }}
-          network.host: {{ env "attr.unique.network.ip-address" }}
+          network.host: [ "0.0.0.0" ]
           discovery.zen.minimum_master_nodes: 2
           # network.publish_host: {{ env "attr.unique.network.ip-address" }}
           {{ if service "escluster-transport"}}discovery.zen.ping.unicast.hosts:{{ range service "escluster-transport" }}
@@ -249,7 +303,7 @@ job "search" {
           transport.tcp.port: {{ env "NOMAD_HOST_PORT_estransport" }}
 
           # Specific port from example elasticsearch.yml (memory should be 1/2 of available memory)
-          bootstrap.memory_lock: true
+          # bootstrap.memory_lock: true
           # node.name: node-1
           # node.attr.rack: r1
           # path.data: /path/to/data,/another/path/to/data_for_perf_raid0
