@@ -9,6 +9,58 @@ job "search" {
     max_parallel = 1
   }
 
+  group "admin" {
+    count = "1"
+
+    restart {
+      attempts = 2
+      interval = "1m"
+      delay = "25s"
+      mode = "delay"
+    }
+
+    task "cerebro" {
+      driver = "docker"
+
+      config {
+        image = "yannart/cerebro:latest"
+        port_map {
+          cerebro = "9000"
+        }
+      }
+
+      resources {
+        # 150 MHz; burstable
+        cpu = 150
+        # 500 MB
+        disk = 500
+        # 1024 MB
+        memory = 1024
+        network {
+          port "cerebro" {
+            static = "9000"
+          }
+        }
+      }
+
+      service {
+        tags = [
+          "admin",
+          "search"
+        ]
+        port = "cerebro"
+        check {
+          name = "alive"
+          type = "tcp"
+          interval = "10s"
+          timeout = "2s"
+        }
+      }
+
+    }
+
+  }
+
   group "simple" {
     count = 1
     restart {
@@ -22,17 +74,17 @@ job "search" {
       driver = "java"
 
       artifact {
-        source = "http://localhost:8080/elasticsearch-5.5.0.zip"
-        // source = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.0.zip"
-        destination = "/local"
+        source = "http://localhost:8080/elasticsearch-5.5.2.zip"
+        // source = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.2.zip"
+        destination = "local"
         options {
-          checksum = "sha1:b5835f207cec4ed73758f5f1640ede59851f873f"
+          checksum = "sha1:9d549e8f3d2bc5051fdf6973e2edd110f04c6dc3"
         }
       }
 
       config {
         class = "org.elasticsearch.bootstrap.Elasticsearch"
-        class_path = "/local/elasticsearch-5.5.0/lib/*"
+        class_path = "local/elasticsearch-5.5.2/lib/*"
         jvm_options = [
           "-Des.path.home=${ES_HOME}",
           "-Xmx512m",
@@ -59,7 +111,7 @@ job "search" {
       }
 
       env {
-        ES_HOME = "/local/elasticsearch-5.5.0"
+        ES_HOME = "local/elasticsearch-5.5.2"
       }
 
       resources {
@@ -70,7 +122,9 @@ job "search" {
         memory = 768
         network {
           mbits = 10
-          port "eshttp" {}
+          port "eshttp" {
+            static = "9200"
+          }
           port "estransport" {}
         }
       }
@@ -101,12 +155,12 @@ job "search" {
           # http.publish_port: {{ env "NOMAD_HOST_PORT_eshttp" }}
           # transport.publish_port: {{ env "NOMAD_HOST_PORT_estransport" }}
 
-          network.host: {{ env "attr.unique.network.ip-address" }}
+          network.host: [ "0.0.0.0" ]
           http.port: {{ env "NOMAD_HOST_PORT_eshttp" }}
           transport.tcp.port: {{ env "NOMAD_HOST_PORT_estransport" }}
 
           # Specific port from example elasticsearch.yml (memory should be 1/2 of available memory)
-          bootstrap.memory_lock: true
+          # bootstrap.memory_lock: true
           # node.name: node-1
           # node.attr.rack: r1
           # path.data: /path/to/data,/another/path/to/data_for_perf_raid0
@@ -115,8 +169,7 @@ job "search" {
           # Below are tweaks which may only be suitable in dev environments
           cluster.routing.allocation.disk.threshold_enabled: false
       EOH
-        destination = "/local/elasticsearch-5.5.0/config/elasticsearch.yml"
-        change_mode = "noop"
+        destination = "local/elasticsearch-5.5.2/config/elasticsearch.yml"
       }
 
     }
@@ -143,17 +196,17 @@ job "search" {
       driver = "java"
 
       artifact {
-        source = "http://localhost:8080/elasticsearch-5.5.0.zip"
-        // source = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.0.zip"
+        source = "http://localhost:8080/elasticsearch-5.5.2.zip"
+        // source = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.2.zip"
         destination = "local"
         options {
-          checksum = "sha1:b5835f207cec4ed73758f5f1640ede59851f873f"
+          checksum = "sha1:9d549e8f3d2bc5051fdf6973e2edd110f04c6dc3"
         }
       }
 
       config {
         class = "org.elasticsearch.bootstrap.Elasticsearch"
-        class_path = "local/elasticsearch-5.5.0/lib/*"
+        class_path = "local/elasticsearch-5.5.2/lib/*"
         jvm_options = [
           "-Des.path.home=${ES_HOME}",
           "-Xmx512m",
@@ -181,7 +234,7 @@ job "search" {
 
       env {
         ES_CLUSTER_NAME = "escluster"
-        ES_HOME = "local/elasticsearch-5.5.0"
+        ES_HOME = "local/elasticsearch-5.5.2"
       }
 
       resources {
@@ -241,7 +294,7 @@ job "search" {
           # transport.publish_port: {{ env "NOMAD_HOST_PORT_estransport" }}
 
           cluster.name: {{ env "ES_CLUSTER_NAME" }}
-          network.host: {{ env "attr.unique.network.ip-address" }}
+          network.host: [ "0.0.0.0" ]
           discovery.zen.minimum_master_nodes: 2
           # network.publish_host: {{ env "attr.unique.network.ip-address" }}
           {{ if service "escluster-transport"}}discovery.zen.ping.unicast.hosts:{{ range service "escluster-transport" }}
@@ -250,7 +303,7 @@ job "search" {
           transport.tcp.port: {{ env "NOMAD_HOST_PORT_estransport" }}
 
           # Specific port from example elasticsearch.yml (memory should be 1/2 of available memory)
-          bootstrap.memory_lock: true
+          # bootstrap.memory_lock: true
           # node.name: node-1
           # node.attr.rack: r1
           # path.data: /path/to/data,/another/path/to/data_for_perf_raid0
@@ -259,7 +312,7 @@ job "search" {
           # Below are tweaks which may only be suitable in dev environments
           cluster.routing.allocation.disk.threshold_enabled: false
       EOH
-        destination = "local/elasticsearch-5.5.0/config/elasticsearch.yml"
+        destination = "local/elasticsearch-5.5.2/config/elasticsearch.yml"
         // change_mode = "restart"
         change_mode = "noop"
         // change_mode = "signal"
