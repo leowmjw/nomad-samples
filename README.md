@@ -1,6 +1,8 @@
 # nomad-samples
 Hashicorp Nomad Samples and Examples worked through on request
 
+## Assumes: tmux, python3 (with pipenv), nodejs (with nvm) is installed
+
 ## Commands to Run (in separate tmux screens)
 
 ```
